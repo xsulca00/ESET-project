@@ -6,51 +6,9 @@
 #include <chrono>
 
 #include "file_handler.h"
+#include "file_utils.h"
 
 using namespace std;
-
-struct Is_guard
-{
-    istream& s;
-    ios_base::iostate old_e {s.exceptions()};
-    Is_guard(istream& ss, ios_base::iostate e) : s{ss} {s.exceptions(s.exceptions()|e);}
-    ~Is_guard() {s.exceptions(old_e);}
-};
-
-ifstream open_input(const string& name, const ios_base::openmode mode = ios_base::in)
-{
-    ifstream ifs; 
-
-    Is_guard guard {ifs, ios_base::failbit | ios_base::badbit};
-    // throw if open failed
-    ifs.open(name, mode);
-
-    return ifs;
-}
-
-long size_of_file(ifstream& ifs)
-{
-    // move to the last byte
-    ifs.seekg(0, ifs.end);
-    ios_base::streampos size {ifs.tellg()};
-    // move to the begin
-    ifs.seekg(0, ifs.beg);
-
-    return size;
-}
-
-string file_to_string(ifstream& ifs)
-{
-    long size {size_of_file(ifs)};
-
-    string s;
-    // may throw bad_alloc, length_error
-    s.resize(size);
-
-    ifs.read(&s[0], size);
-
-    return s;
-}
 
 void find_in_string(const string& fname, string& text, const string& pattern)
 {
@@ -62,18 +20,7 @@ void find_in_string(const string& fname, string& text, const string& pattern)
     }
 }
 
-void is_valid_pattern(const string& s)
-{
-    if (s.length() > 128)
-    {
-        throw runtime_error {"Pattern is too long! (max 128 chars)"};
-    }
-
-    if (s.empty())
-    {
-        throw runtime_error {"Pattern is an empty string!"};
-    }
-}
+void is_valid_pattern(const string&);
 
 int main(int argc, char* argv[])
 {
@@ -142,5 +89,18 @@ int main(int argc, char* argv[])
     cerr << "Lasted: " << t3.count() << " milliseconds\n";
 
     return 0;
+}
+
+void is_valid_pattern(const string& s)
+{
+    if (s.length() > 128)
+    {
+        throw runtime_error {"Pattern is too long! (max 128 chars)"};
+    }
+
+    if (s.empty())
+    {
+        throw runtime_error {"Pattern is an empty string!"};
+    }
 }
 
