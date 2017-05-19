@@ -5,25 +5,21 @@
 #include <fstream>  // std::ifstream
 #include <chrono>
 
-#include "file_handler.h"
+#include "find_handler.h"
 #include "file_utils.h"
 
-using namespace std;
-
-void find_in_string(const string& fname, string& text, const string& pattern)
+namespace arg_check
 {
-    for (Find_handler fh {text}; fh.find_in_text(pattern);)
-    {
-        string s {fh.make_report_for(fname)};
+    using std::string; 
+    using std::runtime_error;
 
-        cout << s;
-    }
+    void validate_pattern(const string&);
 }
-
-void is_valid_pattern(const string&);
 
 int main(int argc, char* argv[])
 {
+    using namespace std;
+
     if (argc != 3)
     {
         cerr << "Usage: " << argv[0] << " file pattern\n";
@@ -37,7 +33,7 @@ int main(int argc, char* argv[])
     ifstream ifs;
     try
     {
-        ifs = open_input(filename);
+        ifs = File_utils::open_input(filename);
     }
     //catch (const ios_base::failure e)
     catch (const exception e)
@@ -49,7 +45,7 @@ int main(int argc, char* argv[])
     // validate pattern
     try
     {
-        is_valid_pattern(pattern);
+        arg_check::validate_pattern(pattern);
     }
     catch (const runtime_error e)
     {
@@ -57,11 +53,11 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    // file content into string cause of find 
+    // file content
     string text;
     try
     {
-        text = file_to_string(ifs);
+        text = File_utils::file_to_string(ifs);
     }
     // mem allocation can fail
     catch (const bad_alloc e)
@@ -81,7 +77,7 @@ int main(int argc, char* argv[])
     // time measurement
     auto t1 = system_clock::now();
 
-    find_in_string(filename, text, pattern);
+    File_search::find_and_print_for(filename, text, pattern);
     
     auto t2 = system_clock::now();
 
@@ -91,7 +87,7 @@ int main(int argc, char* argv[])
     return 0;
 }
 
-void is_valid_pattern(const string& s)
+void arg_check::validate_pattern(const string& s)
 {
     if (s.length() > 128)
     {

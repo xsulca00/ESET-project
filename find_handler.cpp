@@ -1,17 +1,19 @@
 #include <string>
+#include <iostream>
 #include <sstream>
 
-#include "file_handler.h"
+#include "find_handler.h"
 
 using std::string;
+using namespace std;
 
-Find_handler::Find_handler(string& ttext)
+File_search::Find_handler::Find_handler(string& ttext)
         : text{ttext}, offset{0}, prefix{}, suffix{}
 {
 
 }
 
-bool Find_handler::find_in_text(const string& s)
+bool File_search::Find_handler::find_in_text(const string& s)
 {
     offset = text.find(s, offset);
 
@@ -32,11 +34,11 @@ bool Find_handler::find_in_text(const string& s)
     return false;
 }
 
-string Find_handler::make_report_for(const string& fname) const
+string File_search::Find_handler::make_report_for(const string& fname) const
 {
-    using std::stringstream;
+    using std::ostringstream;
 
-    stringstream ss;
+    ostringstream ss;
 
     ss << fname
        << "(" << offset << "): "
@@ -46,4 +48,15 @@ string Find_handler::make_report_for(const string& fname) const
 
     return ss.str();
 }
+
+void File_search::find_and_print_for(const string& fname, string& text, const string& pattern)
+{
+    for (Find_handler fh {text}; fh.find_in_text(pattern);)
+    {
+        string s {fh.make_report_for(fname)};
+
+        cout << s;
+    }
+}
+
 
