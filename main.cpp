@@ -5,15 +5,19 @@
 #include <fstream>  // std::ifstream
 #include <chrono>
 
-#include "find_handler.h"
-#include "file_utils.h"
+#include "main.h"
 
-namespace arg_check
+void Arg_checking::validate_pattern(const string& s)
 {
-    using std::string; 
-    using std::runtime_error;
+    if (s.length() > 128)
+    {
+        throw runtime_error {"Pattern is too long! (max 128 chars)"};
+    }
 
-    void validate_pattern(const string&);
+    if (s.empty())
+    {
+        throw runtime_error {"Pattern is an empty string!"};
+    }
 }
 
 int main(int argc, char* argv[])
@@ -45,7 +49,7 @@ int main(int argc, char* argv[])
     // validate pattern
     try
     {
-        arg_check::validate_pattern(pattern);
+        Arg_checking::validate_pattern(pattern);
     }
     catch (const runtime_error e)
     {
@@ -77,7 +81,7 @@ int main(int argc, char* argv[])
     // time measurement
     auto t1 = system_clock::now();
 
-    File_search::find_and_print_for(filename, text, pattern);
+    String_seeking::find_and_print_for(filename, text, pattern);
     
     auto t2 = system_clock::now();
 
@@ -87,16 +91,4 @@ int main(int argc, char* argv[])
     return 0;
 }
 
-void arg_check::validate_pattern(const string& s)
-{
-    if (s.length() > 128)
-    {
-        throw runtime_error {"Pattern is too long! (max 128 chars)"};
-    }
-
-    if (s.empty())
-    {
-        throw runtime_error {"Pattern is an empty string!"};
-    }
-}
 

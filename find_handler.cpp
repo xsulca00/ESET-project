@@ -2,18 +2,15 @@
 #include <iostream>
 #include <sstream>
 
-#include "find_handler.h"
+#include "main.h"
 
-using std::string;
-using namespace std;
-
-File_search::Find_handler::Find_handler(string& ttext)
+String_seeking::Find_handler::Find_handler(string& ttext)
         : text{ttext}, offset{0}, prefix{}, suffix{}
 {
 
 }
 
-bool File_search::Find_handler::find_in_text(const string& s)
+bool String_seeking::Find_handler::find_in_text(const string& s)
 {
     offset = text.find(s, offset);
 
@@ -22,7 +19,11 @@ bool File_search::Find_handler::find_in_text(const string& s)
         // suffix offset
         size_t so {offset+s.length()};
 
-        prefix = text.substr((offset<3)?0:offset-3, (offset<3)?offset:3);
+        if (offset < 3)
+            prefix = text.substr(0, offset);
+        else
+            prefix = text.substr(offset-3, 3);
+
         suffix = text.substr(so, 3);
 
         // move on to next char
@@ -34,7 +35,7 @@ bool File_search::Find_handler::find_in_text(const string& s)
     return false;
 }
 
-string File_search::Find_handler::make_report_for(const string& fname) const
+string String_seeking::Find_handler::make_report_for(const string& fname) const
 {
     using std::ostringstream;
 
@@ -49,7 +50,7 @@ string File_search::Find_handler::make_report_for(const string& fname) const
     return ss.str();
 }
 
-void File_search::find_and_print_for(const string& fname, string& text, const string& pattern)
+void String_seeking::find_and_print_for(const string& fname, string& text, const string& pattern)
 {
     for (Find_handler fh {text}; fh.find_in_text(pattern);)
     {

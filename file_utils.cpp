@@ -2,12 +2,7 @@
 #include <string>
 #include <ios>
 
-#include "file_utils.h"
-
-using std::ifstream;
-using std::string;
-using std::ios_base;
-using std::istream;
+#include "main.h"
 
 long File_utils::size_of_file(ifstream& ifs)
 {
