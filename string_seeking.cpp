@@ -10,6 +10,22 @@ String_seeking::Find_handler::Find_handler(string& ttext)
 
 }
 
+string& String_seeking::replace_tab_and_eol(string& s)
+{
+	size_t found = s.find_first_of("\t\n");
+	while (found != std::string::npos)
+	{
+		if (s[found] == '\t')
+			s.replace(found, 1, "\\t");
+		else if (s[found] == '\n')
+			s.replace(found, 1, "\\n");
+
+		found = s.find_first_of("\t\n", found + 1);
+	}
+
+	return s;
+}
+
 bool String_seeking::Find_handler::find_in_text(const string& s)
 {
     offset = text.find(s, offset);
@@ -26,6 +42,10 @@ bool String_seeking::Find_handler::find_in_text(const string& s)
 
         suffix = text.substr(so, 3);
 
+		// replace newlines and tabs with '\n' and '\t'
+		prefix = replace_tab_and_eol(prefix);
+		suffix = replace_tab_and_eol(suffix);
+
         // move on to next char
         offset++;
 
@@ -37,8 +57,6 @@ bool String_seeking::Find_handler::find_in_text(const string& s)
 
 string String_seeking::Find_handler::make_report_for(const string& fname) const
 {
-    using std::ostringstream;
-
     ostringstream ss;
 
     ss << fname

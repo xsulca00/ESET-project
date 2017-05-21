@@ -1,94 +1,97 @@
 #include <iostream> // std::cerr, std::cout
-#include <string>
-#include <sstream>
-#include <exception>
-#include <fstream>  // std::ifstream
-#include <chrono>
+#include <string> // std::string
+#include <chrono> // chrono::system_clock::now(), chrono::duration_cast
 
 #include "main.h"
 
-void Arg_checking::validate_pattern(const string& s)
+bool Cmd_args::is_path_valid(const string& s)
 {
-    if (s.length() > 128)
-    {
-        throw runtime_error {"Pattern is too long! (max 128 chars)"};
-    }
+	if (s.empty())
+	{
+		return false;
+	}
 
-    if (s.empty())
-    {
-        throw runtime_error {"Pattern is an empty string!"};
-    }
+	return true;
+}
+
+bool Cmd_args::is_pattern_valid(const string& s)
+{
+	// length must be <= 128
+	if (s.length() > 128)
+	{
+		return false;
+	}
+
+	if (s.empty())
+	{
+		return false;
+	}
+
+	return true;
 }
 
 int main(int argc, char* argv[])
+try
 {
-    using namespace std;
-
     if (argc != 3)
     {
-        cerr << "Usage: " << argv[0] << " file pattern\n";
+        cerr << argc << "Usage: " << argv[0] << " file_or_dir_path pattern\n";
         return 1;
     }
 
-    const string& filename {argv[1]};
-    const string& pattern {argv[2]};
+	const string& path{ argv[1] };
+	if (!Cmd_args::is_path_valid(path))
+	{
+		cerr << "Invalid file or directory path!\n";
+		return 1;
+	}
 
-    // open file
-    ifstream ifs;
-    try
-    {
-        ifs = File_utils::open_input(filename);
-    }
-    //catch (const ios_base::failure e)
-    catch (const exception e)
-    {
-        cerr << "Cannot open " << filename << ": " << e.what() << '\n';
-        return 1;
-    }
+	const string& pattern{ argv[2] };
+	if (!Cmd_args::is_pattern_valid(pattern))
+	{
+		cerr << "Invalid pattern!\n";
+		return 1;
+	}
 
-    // validate pattern
-    try
-    {
-        Arg_checking::validate_pattern(pattern);
-    }
-    catch (const runtime_error e)
-    {
-        cerr << e.what() << '\n';
-        return 1;
-    }
+	// time measurement
+	auto t1 = chrono::system_clock::now();
 
-    // file content
-    string text;
-    try
-    {
-        text = File_utils::file_to_string(ifs);
-    }
-    // mem allocation can fail
-    catch (const bad_alloc e)
-    {
-        cerr << e.what() << '\n';
-        return 1;
-    }
-    // can exceed max allowed string size 
-    catch (const length_error e)
-    {
-        cerr << e.what() << '\n';
-        return 1;
-    }
+	if (File_utils::is_directory(path))
+	{
+		File_utils::traverse_dir(path, pattern);
+	}
+	else
+	{
+		string text{ File_utils::open_and_read_content(path) };
 
-    using namespace chrono;
+		string name{ path };
+		// get only file name
+		name.erase(0, path.find_last_of('\\')+1);
 
-    // time measurement
-    auto t1 = system_clock::now();
+		if (!text.empty())
+			// TODO: only file name
+			String_seeking::find_and_print_for(name, text, pattern);
+	}
 
-    String_seeking::find_and_print_for(filename, text, pattern);
-    
-    auto t2 = system_clock::now();
+	auto t2 = chrono::system_clock::now();
 
-    auto t3 = duration_cast<milliseconds>(t2-t1);
-    cerr << "Lasted: " << t3.count() << " milliseconds\n";
+	auto t3 = chrono::duration_cast<chrono::milliseconds>(t2 - t1);
+	cerr << "Lasted: " << t3.count() << " milliseconds\n";
 
     return 0;
 }
+catch (const bad_alloc e)
+{
+	// mem allocation can fail
+	cerr << "Memory allocation failed!\n";
+	return 1;
+}
+catch (const system_error e)
+{
+	cerr << "Caught system_error with code: " << e.code()
+		<< " meaning " << e.what() << '\n';
+	return 1;
+}
+
 
 

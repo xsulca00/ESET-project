@@ -14,15 +14,18 @@ namespace File_utils
 {
     struct Is_guard
     {
-        istream& s;
-        ios_base::iostate old_e {s.exceptions()};
-        Is_guard(istream& ss, ios_base::iostate e) : s{ss} {s.exceptions(s.exceptions()|e);}
+        ifstream& s;
+        ifstream::iostate old_e {s.exceptions()};
+        Is_guard(ifstream& ss, ifstream::iostate e) : s{ss} {s.exceptions(s.exceptions()|e);}
         ~Is_guard() {s.exceptions(old_e);}
     };
 
-    long size_of_file(ifstream&);
+    ios_base::streampos size_of_file(ifstream&);
     ifstream open_input(const string&, const ios_base::openmode m = ios_base::in);
     string file_to_string(ifstream&);
+	void traverse_dir(const string&, const string&);
+	bool is_directory(const string&);
+	string open_and_read_content(const string&);
 }
 
 namespace String_seeking
@@ -44,11 +47,13 @@ namespace String_seeking
     };
 
     void find_and_print_for(const string& fname, string& text, const string& pattern);
+	string& replace_tab_and_eol(string& s);
 }
 
-namespace Arg_checking
+namespace Cmd_args
 {
-    void validate_pattern(const string&);
+	bool is_path_valid(const string&);
+	bool is_pattern_valid(const string&);
 }
 
 #endif
