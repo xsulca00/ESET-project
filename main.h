@@ -2,11 +2,13 @@
 #define MAIN_H
 
 #include <string>
-#include <ios>
 #include <iostream>
 #include <fstream>
 #include <sstream>
 #include <exception>
+#include <thread>
+#include <vector>
+#include <mutex>
 
 using namespace std;
 
@@ -20,7 +22,7 @@ namespace File_utils
         ~Is_guard() {s.exceptions(old_e);}
     };
 
-    ios_base::streampos size_of_file(ifstream&);
+    size_t size_of_file(ifstream&);
     ifstream open_input(const string&, const ios_base::openmode m = ios_base::in);
     string file_to_string(ifstream&);
 	void traverse_dir(const string&, const string&);
@@ -39,6 +41,7 @@ namespace String_seeking
         string make_report_for(const string&) const;
     private:
         string& text;
+
         // where is pattern in string
         size_t offset;
 

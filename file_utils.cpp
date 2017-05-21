@@ -4,16 +4,24 @@
 
 #include "main.h"
 
-ios_base::streampos File_utils::size_of_file(ifstream& ifs)
-{
-    // move to the last byte
-	// problem with newline symbol
-    ifs.seekg(0, ifs.end);
-    ios_base::streampos size {ifs.tellg()};
-    // move to the begin
-    ifs.seekg(0, ifs.beg);
+size_t File_utils::size_of_file(ifstream& ifs)
+{	
+	// max macro clashes with numeric_limits<streamsize>::max()
+	#undef max
 
-    return size;
+	// position of the current character
+	streampos old_p{ ifs.tellg() };
+
+	// skip characters until EOF or max streamsize is reached
+	ifs.ignore(numeric_limits<streamsize>::max());
+
+	// characters count in file
+	streamsize n{ ifs.gcount() };
+
+	// move back to the old position
+	ifs.seekg(old_p);
+
+    return static_cast<size_t>(n);
 }
 
 ifstream File_utils::open_input(const string& name, const ios_base::openmode mode )
@@ -29,21 +37,11 @@ ifstream File_utils::open_input(const string& name, const ios_base::openmode mod
 
 string File_utils::file_to_string(ifstream& ifs)
 {
-	// max macro clashes with numeric_limits<streamsize>::max()
-	#undef max
+	size_t n{ size_of_file(ifs) };
 
-	// position of the current character
-	streampos old_p{ ifs.tellg() };
-	// skip characters until EOF or max streamsize is reached
-	ifs.ignore(numeric_limits<streamsize>::max());
-	// characters skipped (characters count in file)
-	streamsize n{ ifs.gcount() };
-	// return to the old position
-	ifs.seekg(old_p);
-
-	// read characters into string
 	string s;
-	s.resize(static_cast<size_t>(n));
+	s.resize(n);
+
 	ifs.read(&s[0], s.size());
 
     return s;
@@ -52,6 +50,8 @@ string File_utils::file_to_string(ifstream& ifs)
 void File_utils::traverse_dir(const string& dirpath, const string& pattern)
 {
 	WIN32_FIND_DATA file;
+	static vector<thread> threads;
+	int i{ 0 };
 
 	// just add wildcard, need dirpath later
 	HANDLE find_h{ FindFirstFile((dirpath + "\\*.*").c_str(), &file) };
@@ -63,7 +63,7 @@ void File_utils::traverse_dir(const string& dirpath, const string& pattern)
 
 	do
 	{
-		const string& name{ file.cFileName };
+		const string name{ file.cFileName };
 
 		// skip current & parent directory
 		if (name == "." || name == "..")
@@ -79,12 +79,18 @@ void File_utils::traverse_dir(const string& dirpath, const string& pattern)
 		else
 		{
 			// regular file
-			string text{ File_utils::open_and_read_content(path) };	
+			string text{ File_utils::open_and_read_content(path) };
 			if (!text.empty())
-				String_seeking::find_and_print_for(name, text, pattern);
+			{
+				threads.emplace_back(String_seeking::find_and_print_for, move(name), move(text), ref(pattern));
+			}
 		}
 
 	} while (FindNextFile(find_h, &file));
+
+	for (auto &t : threads)
+		if (t.joinable())
+			t.join();
 
 	FindClose(find_h);
 }

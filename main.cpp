@@ -69,7 +69,6 @@ try
 		name.erase(0, path.find_last_of('\\')+1);
 
 		if (!text.empty())
-			// TODO: only file name
 			String_seeking::find_and_print_for(name, text, pattern);
 	}
 

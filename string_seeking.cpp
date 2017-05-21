@@ -73,9 +73,13 @@ void String_seeking::find_and_print_for(const string& fname, string& text, const
 {
     for (Find_handler fh {text}; fh.find_in_text(pattern);)
     {
-        string s {fh.make_report_for(fname)};
+		static mutex m;
 
-        cout << s;
+        string s {fh.make_report_for(fname)};
+		
+		m.lock();
+		cout << s;
+		m.unlock();
     }
 }
 
