@@ -29,14 +29,22 @@ ifstream File_utils::open_input(const string& name, const ios_base::openmode mod
 
 string File_utils::file_to_string(ifstream& ifs)
 {
-    ios_base::streampos size {size_of_file(ifs)};
+	// max macro clashes with numeric_limits<streamsize>::max()
+	#undef max
 
-    string s;
-    // may throw bad_alloc, length_error
-    s.resize(static_cast<unsigned int>(size));
+	// position of the current character
+	streampos old_p{ ifs.tellg() };
+	// skip characters until EOF or max streamsize is reached
+	ifs.ignore(numeric_limits<streamsize>::max());
+	// characters skipped (characters count in file)
+	streamsize n{ ifs.gcount() };
+	// return to the old position
+	ifs.seekg(old_p);
 
-	// may fail (e.g. linux newline symbol)
-	ifs.read(&s[0], size);
+	// read characters into string
+	string s;
+	s.resize(static_cast<size_t>(n));
+	ifs.read(&s[0], s.size());
 
     return s;
 }
@@ -118,6 +126,3 @@ catch (const length_error e)
 	cerr << "File to string: " << e.what() << '\n';
 	return {};
 }
-
-
-

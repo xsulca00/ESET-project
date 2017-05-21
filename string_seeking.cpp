@@ -59,8 +59,9 @@ string String_seeking::Find_handler::make_report_for(const string& fname) const
 {
     ostringstream ss;
 
+	// move back to result position offset-1
     ss << fname
-       << "(" << offset << "): "
+       << "(" << offset-1 << "): "
        << prefix
        << "..."
        << suffix << '\n';
@@ -79,3 +80,4 @@ void String_seeking::find_and_print_for(const string& fname, string& text, const
 }
 
 
+ 

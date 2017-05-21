@@ -101,8 +101,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="file_utils.cpp" />
-    <ClCompile Include="find_handler.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="string_seeking.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="main.h" />
