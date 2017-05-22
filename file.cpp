@@ -1,5 +1,8 @@
 #include <fstream>
 #include <string>
+#include <iostream>
+#include <exception>
+#include <system_error>
 #include <Windows.h>
 
 #include "main.h"
@@ -24,10 +27,11 @@ size_t File::size_of_file(ifstream& ifs)
     return static_cast<size_t>(n);
 }
 
-ifstream File::open_input(const string& name, const ios_base::openmode mode )
+ifstream File::open_input(const string& name, const ifstream::openmode mode )
 {
     ifstream ifs;
 
+	// set ifstream to throw in case of error
     Is_guard guard {ifs, ifstream::failbit | ifstream::badbit};
     // throw if open failed
     ifs.open(name, mode);
@@ -42,6 +46,7 @@ string File::file_to_string(ifstream& ifs)
 	string s;
 	s.resize(n);
 
+	// copy file content into string
 	ifs.read(&s[0], s.size());
 
     return s;
@@ -51,7 +56,7 @@ void File::traverse_dir(const string& dirpath, const string& pattern)
 {
 	WIN32_FIND_DATA file;
 
-	// just add wildcard, need dirpath later
+	// *.* - any name, any extension
 	HANDLE find_h{ FindFirstFile((dirpath + "\\*.*").c_str(), &file) };
 	if (find_h == INVALID_HANDLE_VALUE)
 	{
@@ -59,6 +64,8 @@ void File::traverse_dir(const string& dirpath, const string& pattern)
 		return;
 	}
 
+	// get all files in directory
+	// in case of other directory - recursively traverse
 	do
 	{
 		const string name{ file.cFileName };
@@ -67,6 +74,7 @@ void File::traverse_dir(const string& dirpath, const string& pattern)
 		if (name == "." || name == "..")
 			continue;
 
+		// extend path to the file 
 		string path{ dirpath + "\\" + name };
 
 		// directory
@@ -100,6 +108,7 @@ bool File::is_directory(const string& s)
 		throw system_error{ec, "Cannot recognize file"};
 	}
 
+	// is directory ?
 	if (a & FILE_ATTRIBUTE_DIRECTORY)
 		return true;
 	return false;

@@ -2,16 +2,15 @@
 #define MAIN_H
 
 #include <string>
-#include <iostream>
 #include <fstream>
-#include <sstream>
-#include <exception>
-#include <shlwapi.h> // PathFileExists
 
 using namespace std;
 
 namespace File
 {
+	// RAII
+	// set ifstream to throw in case of error
+	// set old exception flags in case of any throw
     struct Is_guard
     {
         ifstream& s;
@@ -22,7 +21,7 @@ namespace File
 
 	// implementer interface
     size_t size_of_file(ifstream&);
-    ifstream open_input(const string&, const ios_base::openmode m = ios_base::in);
+    ifstream open_input(const string&, const ifstream::openmode m = ifstream::in);
     string file_to_string(ifstream&);
 
 	// user interface
@@ -33,6 +32,8 @@ namespace File
 
 namespace Search
 {
+	// handle substring search in file
+	// with prefix & suffix correct generating
     class Find_handler
     {
     public:
@@ -52,6 +53,7 @@ namespace Search
         string suffix;
     };
 
+	// get all pattern positions in file and report
     void find_str_and_report(const string& fname, string& text, const string& pattern);
 }
 

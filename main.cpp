@@ -1,7 +1,8 @@
-#include <chrono>
+#include <iostream>
 #include <string>
 #include <system_error>
 #include <exception>
+#include <shlwapi.h> // PathFileExists
 
 #include "main.h"
 
@@ -10,7 +11,7 @@ try
 {
     if (argc != 3)
     {
-        cerr << argc << "Usage: " << argv[0] << " file_or_dir_path pattern\n";
+        cerr << "Usage: " << argv[0] << " file_or_dir_path pattern\n";
         return 1;
     }
 
@@ -19,9 +20,6 @@ try
 
 	const string& pattern{ argv[2] };
 	Arguments::validate_pattern(pattern);
-
-	// time measurement
-	auto t1 = chrono::system_clock::now();
 
 	if (File::is_directory(path))
 	{
@@ -40,11 +38,6 @@ try
 			Search::find_str_and_report(name, text, pattern);
 		}
 	}
-
-	auto t2 = chrono::system_clock::now();
-
-	auto t3 = chrono::duration_cast<chrono::milliseconds>(t2 - t1);
-	cerr << "Lasted: " << t3.count() << " milliseconds\n";
 
     return 0;
 }
