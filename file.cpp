@@ -50,13 +50,12 @@ string File::file_to_string(ifstream& ifs)
 void File::traverse_dir(const string& dirpath, const string& pattern)
 {
 	WIN32_FIND_DATA file;
-	vector<thread> threads;
 
 	// just add wildcard, need dirpath later
 	HANDLE find_h{ FindFirstFile((dirpath + "\\*.*").c_str(), &file) };
 	if (find_h == INVALID_HANDLE_VALUE)
 	{
-		cout << "Cannot find path '" << dirpath << '\n';
+		cerr << "Cannot find path '" << dirpath << '\n';
 		return;
 	}
 
@@ -81,15 +80,11 @@ void File::traverse_dir(const string& dirpath, const string& pattern)
 			string text{ File::open_and_read_content(path) };
 			if (!text.empty())
 			{
-				threads.emplace_back(Search::find_str_and_report, move(name), move(text), ref(pattern));
+				Search::find_str_and_report(name, text, pattern);
 			}
 		}
 
 	} while (FindNextFile(find_h, &file));
-
-	for (auto &t : threads)
-		if (t.joinable())
-			t.join();
 
 	FindClose(find_h);
 }

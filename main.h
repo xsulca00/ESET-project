@@ -6,9 +6,6 @@
 #include <fstream>
 #include <sstream>
 #include <exception>
-#include <thread>
-#include <vector>
-#include <mutex>
 #include <shlwapi.h> // PathFileExists
 
 using namespace std;
