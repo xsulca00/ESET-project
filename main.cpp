@@ -1,7 +1,8 @@
-#include <string>
-#include <exception>
 #include <iostream>
+#include <string>
 #include <system_error>
+#include <exception>
+#include <shlwapi.h> // PathFileExists
 
 #include "main.h"
 

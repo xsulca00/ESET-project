@@ -1,6 +1,7 @@
 #include <string>
 #include <iostream>
 #include <sstream>
+#include <mutex>
 
 #include "main.h"
 
@@ -12,8 +13,9 @@ Search::Find_handler::Find_handler(string& ttext)
 
 void Search::Find_handler::replace_tab_and_eol(string& s)
 {
+	// find '\t' or '\n' and replace
 	size_t found = s.find_first_of("\t\n");
-	while (found != std::string::npos)
+	while (found != string::npos)
 	{
 		if (s[found] == '\t')
 			s.replace(found, 1, "\\t");
@@ -30,9 +32,10 @@ bool Search::Find_handler::find_in_text(const string& s)
 
     if (offset != string::npos)
     {
-        // suffix offset
+        // suffix position
         size_t so {offset+s.length()};
 
+		// prefix is shorther than 3
         if (offset < 3)
             prefix = text.substr(0, offset);
         else
@@ -57,7 +60,7 @@ string Search::Find_handler::make_report_for(const string& fname) const
 {
     ostringstream ss;
 
-	// move back to result position offset-1
+	// move back to position of pattern (offset-1)
     ss << fname
        << "(" << offset-1 << "): "
        << prefix
