@@ -15,10 +15,10 @@ try
         return 1;
     }
 
-	const string& path{ argv[1] };
+	const string path{ argv[1] };
 	Arguments::validate_path(path);
 
-	const string& pattern{ argv[2] };
+	const string pattern{ argv[2] };
 	Arguments::validate_pattern(pattern);
 
 	if (File::is_directory(path))
@@ -46,18 +46,18 @@ try
 
     return 0;
 }
-catch (const bad_alloc e)
+catch (const bad_alloc& e)
 {
 	cerr << "Caugth bad allocation: " << e.what() << '\n';
 	return 1;
 }
-catch (const system_error e)
+catch (const system_error& e)
 {
 	cerr << "Caught system_error with code: " << e.code()
 		 << " meaning " << e.what() << '\n';
 	return 1;
 }
-catch (const runtime_error e)
+catch (const runtime_error& e)
 {
 	cerr << "Caught runtime_error meaning " << e.what() << '\n';
 	return 1;
