@@ -3,6 +3,8 @@
 
 #include <string>
 #include <fstream>
+#include <vector>
+#include <thread>
 
 using namespace std;
 
@@ -18,6 +20,9 @@ namespace File
         Is_guard(ifstream& ss, ifstream::iostate e) : s{ss} {s.exceptions(s.exceptions()|e);}
         ~Is_guard() {s.exceptions(old_e);}
     };
+
+	// spawned threads
+	extern vector<thread> threads;
 
 	// implementer interface
     size_t size_of_file(ifstream&);

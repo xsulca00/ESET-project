@@ -11,7 +11,7 @@ try
 {
     if (argc != 3)
     {
-        cerr << argc << "Usage: " << argv[0] << " file_or_dir_path pattern\n";
+        cerr << "Usage: " << argv[0] << " file_or_dir_path pattern\n";
         return 1;
     }
 
@@ -24,6 +24,11 @@ try
 	if (File::is_directory(path))
 	{
 		File::traverse_dir(path, pattern);
+
+		// wait for all threads till finish
+		for (auto &t : File::threads)
+			if (t.joinable())
+				t.join();
 	}
 	else
 	{

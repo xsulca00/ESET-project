@@ -4,8 +4,6 @@
 #include <exception>
 #include <system_error>
 #include <Windows.h>
-#include <vector>
-#include <thread>
 
 #include "main.h"
 
@@ -54,10 +52,12 @@ string File::file_to_string(ifstream& ifs)
     return s;
 }
 
+// define threads vector
+vector<thread> File::threads;
+
 void File::traverse_dir(const string& dirpath, const string& pattern)
 {
 	WIN32_FIND_DATA file;
-	vector<thread> threads;	// spawned threads
 
 	// *.* - any name, any extension
 	HANDLE find_h{ FindFirstFile((dirpath + "\\*.*").c_str(), &file) };
@@ -97,11 +97,6 @@ void File::traverse_dir(const string& dirpath, const string& pattern)
 		}
 
 	} while (FindNextFile(find_h, &file));
-
-	// wait for all threads til finish
-	for (auto &t : threads)
-		if (t.joinable())
-			t.join();
 
 	FindClose(find_h);
 }
