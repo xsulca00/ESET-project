@@ -4,7 +4,7 @@
 
 #include "main.h"
 
-size_t File_utils::size_of_file(ifstream& ifs)
+size_t File::size_of_file(ifstream& ifs)
 {	
 	// max macro clashes with numeric_limits<streamsize>::max()
 	#undef max
@@ -24,7 +24,7 @@ size_t File_utils::size_of_file(ifstream& ifs)
     return static_cast<size_t>(n);
 }
 
-ifstream File_utils::open_input(const string& name, const ios_base::openmode mode )
+ifstream File::open_input(const string& name, const ios_base::openmode mode )
 {
     ifstream ifs;
 
@@ -35,7 +35,7 @@ ifstream File_utils::open_input(const string& name, const ios_base::openmode mod
     return ifs;
 }
 
-string File_utils::file_to_string(ifstream& ifs)
+string File::file_to_string(ifstream& ifs)
 {
 	size_t n{ size_of_file(ifs) };
 
@@ -47,11 +47,10 @@ string File_utils::file_to_string(ifstream& ifs)
     return s;
 }
 
-void File_utils::traverse_dir(const string& dirpath, const string& pattern)
+void File::traverse_dir(const string& dirpath, const string& pattern)
 {
 	WIN32_FIND_DATA file;
-	static vector<thread> threads;
-	int i{ 0 };
+	vector<thread> threads;
 
 	// just add wildcard, need dirpath later
 	HANDLE find_h{ FindFirstFile((dirpath + "\\*.*").c_str(), &file) };
@@ -79,10 +78,10 @@ void File_utils::traverse_dir(const string& dirpath, const string& pattern)
 		else
 		{
 			// regular file
-			string text{ File_utils::open_and_read_content(path) };
+			string text{ File::open_and_read_content(path) };
 			if (!text.empty())
 			{
-				threads.emplace_back(String_seeking::find_and_print_for, move(name), move(text), ref(pattern));
+				threads.emplace_back(Search::find_str_and_report, move(name), move(text), ref(pattern));
 			}
 		}
 
@@ -95,7 +94,7 @@ void File_utils::traverse_dir(const string& dirpath, const string& pattern)
 	FindClose(find_h);
 }
 
-bool File_utils::is_directory(const string& s)
+bool File::is_directory(const string& s)
 {
 	DWORD a{ GetFileAttributes(s.c_str()) };
 
@@ -111,24 +110,25 @@ bool File_utils::is_directory(const string& s)
 	return false;
 }
 
-string File_utils::open_and_read_content(const string& s)
+string File::open_and_read_content(const string& s)
 try
 {
 	// open file
-	ifstream ifs{ File_utils::open_input(s) };
+	ifstream ifs{ File::open_input(s) };
 
 	// get file content
-	string text{ File_utils::file_to_string(ifs) };
+	string text{ File::file_to_string(ifs) };
 		
 	return text;
 }
 catch (const ifstream::failure e)
 {
-	cerr << "Reading file '" << s << "' failed!: " << e.what() << '\n';
-	return {};
+	cerr << "Caught ifstream::failure when reading file '" 
+		 << s << "' meaning " << e.what() << '\n';
+	return string{};
 }
 catch (const length_error e)
 {
-	cerr << "File to string: " << e.what() << '\n';
-	return {};
+	cerr << "Caught length_error meaning " << e.what() << '\n';
+	return string{};
 }

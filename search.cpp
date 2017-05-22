@@ -4,13 +4,13 @@
 
 #include "main.h"
 
-String_seeking::Find_handler::Find_handler(string& ttext)
+Search::Find_handler::Find_handler(string& ttext)
         : text{ttext}, offset{0}, prefix{}, suffix{}
 {
 
 }
 
-string& String_seeking::replace_tab_and_eol(string& s)
+void Search::Find_handler::replace_tab_and_eol(string& s)
 {
 	size_t found = s.find_first_of("\t\n");
 	while (found != std::string::npos)
@@ -22,11 +22,9 @@ string& String_seeking::replace_tab_and_eol(string& s)
 
 		found = s.find_first_of("\t\n", found + 1);
 	}
-
-	return s;
 }
 
-bool String_seeking::Find_handler::find_in_text(const string& s)
+bool Search::Find_handler::find_in_text(const string& s)
 {
     offset = text.find(s, offset);
 
@@ -43,8 +41,8 @@ bool String_seeking::Find_handler::find_in_text(const string& s)
         suffix = text.substr(so, 3);
 
 		// replace newlines and tabs with '\n' and '\t'
-		prefix = replace_tab_and_eol(prefix);
-		suffix = replace_tab_and_eol(suffix);
+		replace_tab_and_eol(prefix);
+		replace_tab_and_eol(suffix);
 
         // move on to next char
         offset++;
@@ -55,7 +53,7 @@ bool String_seeking::Find_handler::find_in_text(const string& s)
     return false;
 }
 
-string String_seeking::Find_handler::make_report_for(const string& fname) const
+string Search::Find_handler::make_report_for(const string& fname) const
 {
     ostringstream ss;
 
@@ -69,7 +67,7 @@ string String_seeking::Find_handler::make_report_for(const string& fname) const
     return ss.str();
 }
 
-void String_seeking::find_and_print_for(const string& fname, string& text, const string& pattern)
+void Search::find_str_and_report(const string& fname, string& text, const string& pattern)
 {
     for (Find_handler fh {text}; fh.find_in_text(pattern);)
     {

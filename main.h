@@ -9,10 +9,11 @@
 #include <thread>
 #include <vector>
 #include <mutex>
+#include <shlwapi.h> // PathFileExists
 
 using namespace std;
 
-namespace File_utils
+namespace File
 {
     struct Is_guard
     {
@@ -22,15 +23,18 @@ namespace File_utils
         ~Is_guard() {s.exceptions(old_e);}
     };
 
+	// implementer interface
     size_t size_of_file(ifstream&);
     ifstream open_input(const string&, const ios_base::openmode m = ios_base::in);
     string file_to_string(ifstream&);
+
+	// user interface
 	void traverse_dir(const string&, const string&);
 	bool is_directory(const string&);
 	string open_and_read_content(const string&);
 }
 
-namespace String_seeking
+namespace Search
 {
     class Find_handler
     {
@@ -40,6 +44,8 @@ namespace String_seeking
         bool find_in_text(const string&);
         string make_report_for(const string&) const;
     private:
+		void replace_tab_and_eol(string&);
+
         string& text;
 
         // where is pattern in string
@@ -49,14 +55,13 @@ namespace String_seeking
         string suffix;
     };
 
-    void find_and_print_for(const string& fname, string& text, const string& pattern);
-	string& replace_tab_and_eol(string& s);
+    void find_str_and_report(const string& fname, string& text, const string& pattern);
 }
 
-namespace Cmd_args
+namespace Arguments
 {
-	bool is_path_valid(const string&);
-	bool is_pattern_valid(const string&);
+	void validate_path(const string&);
+	void validate_pattern(const string&);
 }
 
 #endif
