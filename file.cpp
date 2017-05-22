@@ -57,7 +57,8 @@ void File::traverse_dir(const string& dirpath, const string& pattern)
 	WIN32_FIND_DATA file;
 
 	// *.* - any name, any extension
-	HANDLE find_h{ FindFirstFile((dirpath + "\\*.*").c_str(), &file) };
+	string search_path{ dirpath + "\\*.*" };
+	HANDLE find_h{ FindFirstFile(search_path.c_str(), &file) };
 	if (find_h == INVALID_HANDLE_VALUE)
 	{
 		cerr << "Cannot find path '" << dirpath << '\n';
@@ -125,13 +126,13 @@ try
 		
 	return text;
 }
-catch (const ifstream::failure e)
+catch (const ifstream::failure& e)
 {
 	cerr << "Caught ifstream::failure when reading file '" 
 		 << s << "' meaning " << e.what() << '\n';
 	return string{};
 }
-catch (const length_error e)
+catch (const length_error& e)
 {
 	cerr << "Caught length_error meaning " << e.what() << '\n';
 	return string{};
